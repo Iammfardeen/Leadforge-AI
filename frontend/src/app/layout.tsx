@@ -1,4 +1,4 @@
-import "@/styles/globals.css"; // Or your global css path
+import "./globals.css"; // This fixes the module-not-found build error
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
