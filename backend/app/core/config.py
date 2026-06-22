@@ -5,9 +5,11 @@ All values are read from environment variables (see .env.example).
 Nothing here should be hardcoded with real secrets — local Docker dev
 uses the .env file, production uses Railway/Render env vars.
 """
+import json
 from functools import lru_cache
-from typing import List
+from typing import List, Union
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,7 +23,33 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # --- CORS ---
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    # We update the type to Union to allow adaptive string interception
+    CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000"]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        # If it's already a clean list from local defaults, pass it right through
+        if isinstance(v, list):
+            return v
+        
+        if isinstance(v, str):
+            v = v.strip()
+            # If the environment variable is empty, fallback to local dev url
+            if not v:
+                return ["http://localhost:3000"]
+            
+            # If it looks like a JSON array string, attempt parsing it
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass  # Fall back to standard parsing if quotes are malformed
+            
+            # Bulletproof fallback: split by commas if it's a standard list string
+            return [item.strip() for item in v.split(",") if item.strip()]
+            
+        return v
 
     # --- Supabase ---
     SUPABASE_URL: str = ""
