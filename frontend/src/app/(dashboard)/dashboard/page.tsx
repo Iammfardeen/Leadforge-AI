@@ -1,22 +1,6 @@
 import { Search, ScanLine, MessageCircle, Users, TrendingUp, Gauge } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-// Try standard deep relative path resolution
-let createSupabaseServerClient: any;
-
-try {
-  // Try 3 levels up (if utils is right inside src alongside app)
-  createSupabaseServerClient = require("../../../utils/supabase/server").createSupabaseServerClient;
-} catch {
-  try {
-    // Try 4 levels up (if app group directories add an extra tracking layer)
-    createSupabaseServerClient = require("../../../../utils/supabase/server").createSupabaseServerClient;
-  } catch {
-    // Ultimate build fallback: mock client to stop Webpack from crashing the compilation loop
-    createSupabaseServerClient = () => ({});
-  }
-}
-
 export const dynamic = "force-dynamic";
 
 const STAT_DEFS = [
