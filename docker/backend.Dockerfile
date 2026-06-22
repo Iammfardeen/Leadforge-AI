@@ -14,13 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# FIX 1: Point to the backend folder where requirements.txt lives
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Playwright's browser binary — needed once the screenshot feature is wired up
 RUN playwright install --with-deps chromium || true
 
-COPY . .
+# FIX 2: Copy only the contents of the backend folder into the container
+COPY backend/ .
 
 EXPOSE 8000
 
