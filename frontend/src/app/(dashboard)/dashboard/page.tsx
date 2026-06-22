@@ -2,6 +2,10 @@ import { Search, ScanLine, MessageCircle, Users, TrendingUp, Gauge } from "lucid
 
 import { Card } from "@/components/ui/card";
 
+// Force Next.js to treat this page dynamically, ensuring it evaluates 
+// runtime configurations and environment variables cleanly on every request.
+export const dynamic = "force-dynamic";
+
 const STAT_DEFS = [
   { key: "total_leads", label: "Total Leads", icon: Search },
   { key: "analyzed", label: "Analyzed", icon: ScanLine },
