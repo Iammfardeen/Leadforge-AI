@@ -2,14 +2,22 @@ import { Search, ScanLine, MessageCircle, Users, TrendingUp, Gauge } from "lucid
 
 import { Card } from "@/components/ui/card";
 
-const STAT_DEFS = [
+// Fix: explicitly define the structure of a stat item so suffix is marked as optional
+interface StatDef {
+  readonly key: string;
+  readonly label: string;
+  readonly icon: React.ComponentType<{ size?: number; className?: string }>;
+  readonly suffix?: string; // The "?" tells TypeScript this is optional across all objects
+}
+
+const STAT_DEFS: readonly StatDef[] = [
   { key: "total_leads", label: "Total Leads", icon: Search },
   { key: "analyzed", label: "Analyzed", icon: ScanLine },
   { key: "messages_generated", label: "Messages Generated", icon: MessageCircle },
   { key: "meetings", label: "Meetings", icon: Users },
   { key: "conversion_rate_percent", label: "Conversion Rate", icon: TrendingUp, suffix: "%" },
   { key: "average_lead_score", label: "Avg. Lead Score", icon: Gauge },
-] as const;
+];
 
 export default async function DashboardPage() {
   // NOTE (foundation phase): summary stats will be wired to GET /reports/summary
@@ -51,7 +59,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="p-4">
           <h3 className="mb-1 text-sm font-semibold text-ink">Get started</h3>
           <p className="mb-4 text-sm text-ink-muted">
             Run your first search in Lead Finder to start building your pipeline.
@@ -65,7 +73,7 @@ export default async function DashboardPage() {
           </a>
         </Card>
 
-        <Card>
+        <Card className="p-4">
           <h3 className="mb-1 text-sm font-semibold text-ink">Recent activity</h3>
           <p className="text-sm text-ink-muted">Nothing yet. Activity will appear here as you work leads.</p>
         </Card>
