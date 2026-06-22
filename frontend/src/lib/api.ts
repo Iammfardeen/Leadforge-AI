@@ -1,6 +1,11 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Explicitly log the environment variable to verify it's not undefined
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  console.error("CRITICAL: NEXT_PUBLIC_API_URL is undefined in this environment!");
+}
 
 export class ApiError extends Error {
   status: number;
@@ -10,16 +15,15 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Calls the FastAPI backend at /api/v1/{path}, attaching the current
- * Supabase session's access token as a Bearer header. Use from Client
- * Components; for Server Components, fetch the session server-side instead.
- */
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const supabase = createSupabaseBrowserClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  const res = await fetch(`${API_BASE_URL}/api/v1${path}`, {
+  const url = `${API_BASE_URL ?? "https://leadforge-ai-u6sc.onrender.com"}/api/v1${path}`;
+  
+  console.log("Attempting request to:", url);
+
+  const res = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -29,13 +33,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(body.detail ?? "Request failed", res.status);
+    console.error(`API Error ${res.status}:`, await res.text().catch(() => "No error body"));
+    throw new ApiError("Request failed", res.status);
   }
 
-  if (res.status === 204) {
-    return undefined as T;
-  }
-
-  return res.json();
+  return res.status === 204 ? (undefined as T) : res.json();
 }
